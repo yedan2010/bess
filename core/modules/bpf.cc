@@ -1159,7 +1159,7 @@ CommandResponse BPF::CommandAdd(const bess::pb::BPFArg &arg) {
         bpf_jit_compile(il_code.bf_insns, il_code.bf_len, &filter->mmap_size);
     pcap_freecode(&il_code);
     if (!filter->func) {
-      free(filter->exp); //TODO: FREE on exit
+      free(filter->exp);
       return CommandFailure(ENOMEM, "BPF JIT compilation error");
     }
 #else
