@@ -40,7 +40,7 @@
 #include <cstring>
 
 
-#ifdef x86_64 //JIT compilation code only works in 64-bit
+#ifdef __x86_64 //JIT compilation code only works in 64-bit
 /*
  * Registers
  */
@@ -1121,7 +1121,7 @@ CommandResponse BPF::Init(const bess::pb::BPFArg &arg) {
 
 void BPF::DeInit() {
   for (int i = 0; i < n_filters_; i++) {
-#ifdef x86_64
+#ifdef __x86_64
     munmap(reinterpret_cast<void *>(filters_[i].func), filters_[i].mmap_size);
 #else
     pcap_freecode(&(filters_[i].il_code));
@@ -1148,7 +1148,7 @@ CommandResponse BPF::CommandAdd(const bess::pb::BPFArg &arg) {
     filter->priority = f.priority();
     filter->gate = f.gate();
     filter->exp = strdup(exp);
-#ifdef x86_64
+#ifdef __x86_64
     struct bpf_program il_code;
     if (pcap_compile_nopcap(SNAPLEN, DLT_EN10MB,  // Ethernet
                             &il_code, exp, 1,     // optimize (IL only)
@@ -1199,7 +1199,7 @@ inline void BPF::process_batch_1filter(bess::PacketBatch *batch) {
     int ret;
     int idx;
 
-#ifdef x86_64
+#ifdef __x86_64
     ret = filter->func(pkt->head_data<uint8_t *>(), pkt->total_len(),
                        pkt->head_len());
 #else
@@ -1252,7 +1252,7 @@ void BPF::ProcessBatch(bess::PacketBatch *batch) {
     gate_idx_t gate = 0; /* default gate for unmatched pkts */
 
     for (int j = 0; j < n_filters; j++, filter++) {
-#ifdef x86_64
+#ifdef __x86_64
       if (filter->func(pkt->head_data<uint8_t *>(), pkt->total_len(),
                        pkt->head_len()) != 0) {
         gate = filter->gate;
